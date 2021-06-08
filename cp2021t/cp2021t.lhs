@@ -1037,17 +1037,10 @@ g_eval_exp x (Right (Right (Right (E, a))))= expd a
 
 
 ---
-clean = undefined
---clean x (Left ()) = x (Left ()) 
---clean x (Right (Left a)) = x (Right (Left a))  
+clean (Bin Product _ (N 0)) = outExpAr $ N 0
+clean (Bin Product (N 0) _) = outExpAr $ N 0
+clean x = outExpAr x
 
---clean x (Right (Right (Left (Sum, (0,b))))) = b 
---clean (Right (Right (Left (Sum, (a,0))))) = (Right (Right (Left a)))
---clean (Right (Right (Left (Product, (1,b))))) = (Right (Right (Left (Left b)))) 
---clean (Right (Right (Left (Product, (a,1))))) = (Right (Right (Left (Left a))))
---clean (Right (Right (Right (Negate, a)))) = -a
---clean (Right (Right (Right (E, 0)))) = (Right (Right (Right one)))
----
 gopt a = g_eval_exp a
 
 \end{code}
@@ -1055,11 +1048,27 @@ gopt a = g_eval_exp a
 \begin{code}
 sd_gen :: Floating a =>
     Either () (Either a (Either (BinOp, ((ExpAr a, ExpAr a), (ExpAr a, ExpAr a))) (UnOp, (ExpAr a, ExpAr a)))) -> (ExpAr a, ExpAr a)
-sd_gen = undefined
+--sd_gen = undefined
+
+sd_gen (Left ())= (X,N 1)
+sd_gen (Right (Left a))= (N a,N 0)
+sd_gen (Right (Right (Left (Sum, ((a,b),(c,d)))))) = (Bin Sum a c,Bin Sum b d)
+sd_gen (Right (Right (Left (Product, ((a,b),(c,d))))))= (Bin Product a c,Bin Sum (Bin Product a d) (Bin Product b c))
+sd_gen (Right (Right (Right (Negate, (a,b)))))= (Un Negate a,Un Negate b)
+sd_gen (Right (Right (Right (E, (a,b)))))= (Un E a,Bin Product (Un E a) b)
+
 \end{code}
 
 \begin{code}
-ad_gen = undefined
+--ad_gen = undefined
+
+ad_gen x (Left ())= (x,1)
+ad_gen x (Right (Left n))= (n,0)
+ad_gen x (Right (Right (Left (Sum, ((a,b),(c,d))))))= (a+c,b+d)
+ad_gen x (Right (Right (Left (Product, ((a,b),(c,d))))))= (a*c,a*d+b*c)
+ad_gen x (Right (Right (Right (Negate, (a,b)))))= (-a,-b)
+ad_gen x (Right (Right (Right (E, (a,b)))))= (expd a,(expd a)*b)
+
 \end{code}
 
 \subsection*{Problema 2}
@@ -1114,12 +1123,30 @@ Solução para listas não vazias:
 avg = p1.avg_aux
 
 --avg_aux (a:x) = for loop init where
---                    loop (av, len) = (div (a+ len * av) (len+1), 1+len)
---                    init = (a, 0)
+--                  loop (avg, length) = (div (a + (p2) * (p1)) (succ . (p2)), succ . p2)
+--                  init = (a, 0)
+avg_aux = undefined
+
+--avg_aux = undefined      
+--e x 0 = 1
+--e x (n + 1) = h x n + e x n
+--h x 0 = x
+--h x (n + 1) = x / (s n) * h x n
+--s 0 = 2
+--s (n + 1) = 1 + s n
+     
+--e0 x = prj . for loop init where
+--				init = (1, x , 2)
+--				loop (e, h, s) = (h + e, x / s * h, 1 + s)
+--				prj (e, h, s) = e
+--g2 (_,n) = succ n
+
+--len = cataList (either (const 0) g2)
+
 \end{code}
 
 \begin{code}
-avg_aux = undefined
+--avg_aux = undefined
 \end{code}
 Solução para árvores de tipo \LTree:
 \begin{code}
