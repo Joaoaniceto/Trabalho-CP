@@ -7,6 +7,8 @@
 \usepackage{subcaption}
 \usepackage{adjustbox}
 \usepackage{color}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
 \definecolor{red}{RGB}{255,  0,  0}
 \definecolor{blue}{RGB}{0,0,255}
 \def\red{\color{red}}
@@ -1072,28 +1074,81 @@ ad_gen x (Right (Right (Right (E, (a,b)))))= (expd a,(expd a)*b)
 \end{code}
 
 \subsection*{Problema 2}
-Definir
-\begin{code}
-
-        -- **  Fiz esta, desmontando a definição de f'
-        -- **  porém, apesar de não dar erros, dá me valores errados
-    --loop (cat, h, p1, p2, s, r) = (cat*h, div p1 p2, p1+s, p2+r, s+8, r+2)
-    --inic = (1,1,2,2,10,4)
-    --prj(cat, h, p1, p2, s, r) = cat
-
-        -- ** Queria implementar esta, usando a definição f' do professor
-loop (cat, h, i) = (h * cat,  idiv (f' 4 6 2 i)  (f' 1 3 2 i), succ i)
-inic = (1,1,1)
-prj(cat, h, i) = cat
-
-\end{code}
-por forma a que
+Resposta:
 \begin{code}
 cat = prj . (for loop inic)
 \end{code}
-seja a função pretendida.
-\textbf{NB}: usar divisão inteira.
-Apresentar de seguida a justificação da solução encontrada.
+\begin{code}
+
+loop (cat, h1, h2, i) = (div (cat * h1) h2 , (f' 4 6 2 i) , (f' 1 3 2 i), succ i)
+inic = (1,2,2,1)
+prj(cat, h1, h2, i) = cat
+
+\end{code}
+O objetivo deste problema é, dada a fórmula $C_n$ que calcula o $n$-ésimo número de Catalan, derivar um ciclo-for que calcule este número sem utilizar fatoriais nos cálculos.
+
+\begin{eqnarray*}
+	C_n = \frac{(2n)!}{(n+1)! (n!) } 
+	\label{eq:cat}
+\end{eqnarray*}
+
+Como não podemos utilizar fatoriais, temos de perceber como $C_n$ pode ser representado como uma expressão recursiva. Para tal, calculamos $C_{n+1}$ e simplificamos até obter então uma expressão recursiva. Os seguintes cálculos foram feitos para chegar ao pretendido: 
+
+
+\begin{align*}
+C_{n+1} &=\frac{(2(n+1))!}{((n+1)+1)! ((n+1)!)}\\
+        \\
+     &= \frac{(2n+2)!}{((n+2)! (n+1)!} \\   
+     \\
+     &= \frac{(2n+2)(2n+1)(2n)!}{(n+2)(n+1)! (n+1)n!}\\
+     \\
+     &= \frac{(2n+2)(2n+1)}{(n+2) (n+1)} \times \frac{(2n)!}{(n+1)! (n!)} \\
+     \\
+     &= \frac{4n^2 + 6n + 2}{n^2 + 3n +2} \times C_n 
+\end{align*}
+
+Mais simplificações poderiam ter sido feitas na parte da divisão dos dois polinómios de segundo grau, porém, como no enunciado é dada a definição de $f x= ax^2 + bx + c$, derivada em duas funções mutuamente recursivas, utilizá-la-emos na nossa resolução. \\
+Para evitar erros de aproximação, optamos por fazer a divisão o mais tarde possível, e como tal, a nossa implementação de $C_{n+1}$ terá a seguinte estrutura: 
+
+\begin{align*}
+     & C_{n+1}= \frac{(4n^2 + 6n + 2)\times C_n}{n^2 + 3n +2} 
+\end{align*}
+
+
+
+Posto isto, e tendo em conta as regras listadas no enunciado para derivar um ciclo-for, temos a informação necessária para resolver o problema. Temos de definir \texttt{prj, loop} e \texttt{inic}, tal que:\\
+
+\texttt{cat = prj.(for loop inic)}\\
+\\
+A nossa solução é a seguinte:\\
+\\
+\texttt{
+prj(cat, h1, h2, i) = cat\\
+loop (cat, h1, h2, i) = (div (cat * h1) h2,(f' 4 6 2 i),(f' 1 3 2 i), succ i)\\
+inic = (1,2,2,1)\\
+}\\
+\\
+Ou seja:\\
+\\
+\texttt{
+cat = div (cat * h1) h2\\
+h1 = f' 4 6 3 i\\
+h2 = f' 1 3 2 i\\
+i = succ i\\
+}\\
+
+
+Para chegar a esta solução, para além das sugestões passadas no enunciado, tivemos em conta o seguinte:
+\begin{itemize}
+    \item A $4n^2 +6n + 2$ aplicamos a definição de \texttt{f'}, ficando com o seguinte código Haskell \texttt{f' 4 6 2 x} para calcular o valor deste polinómio no valor $x$.
+    \item O mesmo é aplicado em $n^2 + 3n + 2$ resultando em \texttt{f' 1 3 2 x}.
+    \item Adicionar uma variável, \texttt{i}, que irá incrementar a cada chamada recursiva. Sentimos a necessidade de a aplicar pois a omissão da mesma não nos permitia correr a função. Esta variável é igual a \texttt{n}. Por exemplo, calculando "manualmente" \texttt{cat 3} onde \texttt{n = 2} e \texttt{i = 2}:\\
+    \\
+    \texttt{cat (n+1) = div (cat n * h1 i) (h2 i)}\\
+    \texttt{cat 3 = cat (2+1) = div (cat 2 * h1 2) (h2 2) = 5}\\
+    \\
+    Reconhecemos que algo poderia ter sido feito para evitar a implementação deste \texttt{i}, porém não conseguimos utilizar a função \texttt{f'} omitindo o argumento. 
+\end{itemize}
 
 \begin{eqnarray}
 	C_n = \frac{(2n)!}{(n+1)! (n!) }
