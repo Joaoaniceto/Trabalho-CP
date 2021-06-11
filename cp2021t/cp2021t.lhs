@@ -704,8 +704,8 @@ Verifique as suas funções testando a propriedade seguinte:
 A média de uma lista não vazia e de uma \LTree\ com os mesmos elementos coincide,
 a menos de um erro de 0.1 milésimas:
 \begin{code}
-prop_avg :: Ord a => [a] -> Property
-prop_avg = nonempty .==>. diff .<=. const 0.000001 where
+prop_avg :: [Double] -> Property
+prop_avg = nonempty .==>. diff .<=. const 0.000001  where
    diff l = avg l - (avgLTree . genLTree) l
    genLTree = anaLTree lsplit
    nonempty = (>[])
@@ -1177,36 +1177,41 @@ Solução para listas não vazias:
 \begin{code}
 avg = p1.avg_aux
 
---avg_aux (a:x) = for loop init where
---                  loop (avg, length) = (div (a + (p2) * (p1)) (succ . (p2)), succ . p2)
---                  init = (a, 0)
-avg_aux = undefined
 
---avg_aux = undefined      
---e x 0 = 1
---e x (n + 1) = h x n + e x n
---h x 0 = x
---h x (n + 1) = x / (s n) * h x n
---s 0 = 2
---s (n + 1) = 1 + s n
-     
---e0 x = prj . for loop init where
---				init = (1, x , 2)
---				loop (e, h, s) = (h + e, x / s * h, 1 + s)
---				prj (e, h, s) = e
---g2 (_,n) = succ n
+avg_aux = avgX
 
---len = cataList (either (const 0) g2)
+inListasNaoVazias = either singl cons 
+outListasNaoVazias [a] = i1 (a) 
+outListasNaoVazias (a:x) = i2 (a,x) 
+
+recListasNaoVazias = recList 
+
+cataListasNaoVazias g = g . recListasNaoVazias( cataListasNaoVazias g) . outListasNaoVazias
+
+g1 a = (a,1) 
+g2 (a,(b,c)) = (((b*c)+a) / (c+1), c+1) 
+
+--lengthX = cataListasNaoVazias (either g1 g2)
+
+avgX = cataListasNaoVazias (either g1 g2)
 
 \end{code}
 
 \begin{code}
---avg_aux = undefined
 \end{code}
 Solução para árvores de tipo \LTree:
 \begin{code}
+
 avgLTree = p1.cataLTree gene where
-   gene = undefined
+   gene = either gLT1 gLT2 
+
+
+gLT1 a = (a,1)
+gLT2 ((a,b),(c,d)) = (((a*b)+(c*d)) / (b+d), b+d)
+
+
+
+
 \end{code}
 
 \subsection*{Problema 5}
