@@ -9,6 +9,13 @@
 \usepackage{color}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{stmaryrd}
+\usepackage[all]{xy}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{dsfont}
+
 \definecolor{red}{RGB}{255,  0,  0}
 \definecolor{blue}{RGB}{0,0,255}
 \def\red{\color{red}}
@@ -129,15 +136,15 @@
 
 \begin{center}\large
 \begin{tabular}{ll}
-\textbf{Grupo} nr. & 999 (preencher)
+\textbf{Grupo} nr. & 93
 \\\hline
-a11111 & Nome1 (preencher)	
+a71452 & Diogo Filipe Ferreira Pereira Monteiro
 \\
-a22222 & Nome2 (preencher)	
+a80292 & João Aniceto Rodrigues Rocha
 \\
-a33333 & Nome3 (preencher)	
+a82726 & Matias Abreu Capitão
 \\
-a44444 & Nome4 (preencher, se aplicável, ou apagar)	
+a77457 & Rafael Antunes Simões	
 \end{tabular}
 \end{center}
 
@@ -1017,7 +1024,89 @@ sd = p2 . cataExpAr sd_gen
 ad :: Floating a => a -> ExpAr a -> a
 ad v = p2 . cataExpAr (ad_gen v)
 \end{code}
+
+\\
+\large{Exercício 1.1}\\
+\\
+\normalsize
+
 Definir:
+
+Começamos por determinar o outExpAr. Para tal basta resolver a equação outExpAr . inExpAr = id:
+\begin{eqnarray*}
+\start
+	|outExpAr.inExpAr = id|
+%
+\just\equiv{ Definição inExpAr }
+%
+        |outExpAr.[const X, num_ops]|
+%
+\just\equiv{ Fusão-+ }
+%
+        |[outExpAr.(const X),outExpAr.num_ops]=id|
+%
+\just\equiv{ Universal-+ e Definição num\_ops}
+%
+		|lcbr(
+		outExpAr.(const X) = i1
+	)(
+		outExpAr.[N,ops] = i2
+	)|
+%
+\just\equiv{Definição ops}
+%
+		|lcbr(
+		outExpAr.(const X) = i1
+	)(
+		outExpAr.[N,[Bin op a b,uncurry Un]] = i2
+	)|
+%
+\just\equiv{Fusão-+}
+%
+		|lcbr(
+		outExpAr.(const X) = i1
+	)(
+		either (outExpAr.N) (outExpAr.[Bin op a b,uncurry Un]) = i2
+	)|
+%
+\just\equiv{Universal-+}
+%
+		|lcbr(
+		outExpAr.(const X) = i1
+	)(lcbr(
+		outExpAr.N = i2.i1
+	)(
+		outExpAr.[Bin op a b,uncurry Un] = i2.i2
+	))|
+%
+\just\equiv{Fusão-+ e Universal-+}
+%
+		|lcbr(
+		outExpAr.(const X) = i1
+	)(lcbr(
+		outExpAr.N = i2.i1
+	)(lcbr(
+		outExpAr.(Bin op a b) = i2.i2.i1
+	)(
+		outExpAr.(uncurry Un) = i2.i2.i2
+	)
+	))|
+%
+\just\equiv{Introdução De Variáveis}
+%
+		|lcbr(
+		outExpAr X = i1 ()
+	)(lcbr(
+		outExpAr (N x) = i2 (i1 x)
+	)(lcbr(
+		outExpAr (Bin a b c) = i2 (i2 (i1 (a,(b,c))))
+	)(
+		outExpAr (Un a b) = i2 (i2 (i2 (a, b))) 
+	)
+	))|
+\qed
+\end{eqnarray*}
+
 
 \begin{code}
 outExpAr X = i1 ()
@@ -1025,20 +1114,48 @@ outExpAr (N x) = i2 (i1 x)
 outExpAr (Bin a b c) = i2 (i2 (i1 (a,(b,c))))
 outExpAr (Un a b) = i2 (i2 (i2 (a, b))) 
 
----
+\end{code}
+
+Tendo em conta a informação fornecida pelo professor no video '10a' que diz que, podemos obter o funtor recursivo, utilizando o funtor de base e trocando o primeiro parâmetro e passando-o a identidade ($id$). Na FAQ 'Q9' presente no \textit{website} da unidade curricular, temos a definição de $baseExpAr'$ que faz com que seja bastante simples chegar à definição de \textit{recExpAr}:
+\begin{code}
 baseExpAr' g f = baseExpAr id g id f f id f
 recExpAr f = baseExpAr' id f
 
----
+\end{code}
+\\
+\large{Exercício 1.2}\\
+\\
+\normalsize
+O gene do catamorfismo da função eval\textunderscore exp será definido da seguinte maneira:
+
+\begin{code}
 g_eval_exp x (Left ())= x 
 g_eval_exp x (Right (Left a))= a 
 g_eval_exp x (Right (Right (Left (Sum, (a,b)))))= a+b
 g_eval_exp x (Right (Right (Left (Product, (a,b)))))= a*b
 g_eval_exp x (Right (Right (Right (Negate, a))))= -a
 g_eval_exp x (Right (Right (Right (E, a))))= expd a
+\end{code}
 
 
----
+E o diagrama deste catamorfismo terá o seguinte aspecto:
+\\
+begin{equation*}
+    \xymatrix@C=2cm@R=2cm{
+    ExpAr\ar@/^2pc/[r]^{outExpAr} \ar[d]_{\llparenthesis g\_eval\_exp\rrparenthesis}  & 1 + (A + ((BinOp \times (ExpAr \times ExpAr)) + (UnOp \times ExpAr))) \ar@/^2pc/[l]^{inExpAr} \ar[d]^{id + (id + ((id \times (\llparenthesis g\_eval\_exp\rrparenthesis \times \llparenthesis g\_eval\_exp\rrparenthesis)) + (id \times \llparenthesis g\_eval\_exp\rrparenthesis)}  \\
+    A & \ar@/^1pc/[l]^{g\_eval\_exp}1 +(A + ((BinOp \times (A \times A)) + (UnOp \times A)))
+    }
+\end{equation*}
+
+
+
+
+\\
+\large{Exercício 1.3}\\
+\\
+\normalsize
+
+\begin{code}
 clean (Bin Product _ (N 0)) = outExpAr $ N 0
 clean (Bin Product (N 0) _) = outExpAr $ N 0
 clean x = outExpAr x
@@ -1047,10 +1164,15 @@ gopt a = g_eval_exp a
 
 \end{code}
 
+
+\\
+\large{Exercício 1.4}\\
+\\
+\normalsize
+
 \begin{code}
 sd_gen :: Floating a =>
     Either () (Either a (Either (BinOp, ((ExpAr a, ExpAr a), (ExpAr a, ExpAr a))) (UnOp, (ExpAr a, ExpAr a)))) -> (ExpAr a, ExpAr a)
---sd_gen = undefined
 
 sd_gen (Left ())= (X,N 1)
 sd_gen (Right (Left a))= (N a,N 0)
@@ -1061,8 +1183,24 @@ sd_gen (Right (Right (Right (E, (a,b)))))= (Un E a,Bin Product (Un E a) b)
 
 \end{code}
 
+
+\\
+\large{Exercício 1.5}\\
+\\
+\normalsize
+
+Sendo que queremos encontrar o gene de $ad$ podemos assumir o próximo diagrama:\\
+
+\begin{equation*}
+    \xymatrix@C=2cm@R=2cm{
+     ExpAr\ar@/^2pc/[r]^{outExpAr} \ar[d]^{\llparenthesis ad\_gen\rrparenthesis} \ar@/_2pc/[dd]_{ad} & 1 + (A + ((BinOp \times (ExpAr \times ExpAr)) + (UnOp \times ExpAr))) \ar@/^2pc/[l]^{inExpAr} \ar[d]^{id + (id + ((id \times (\llparenthesis ad\_gen\rrparenthesis \times \llparenthesis ad\_gen\rrparenthesis)) + (id \times \llparenthesis ad\_gen\rrparenthesis)}  \\
+   (A \times A) \ar[d]^{\pi_2} & \ar@/^1pc/[l]^{ad\_gen}1 +(A + ((BinOp \times ((A\times A) \times (A \times A))) + (UnOp \times (A\times A)))) \\
+   A
+    }
+\end{equation*}
+
+
 \begin{code}
---ad_gen = undefined
 
 ad_gen x (Left ())= (x,1)
 ad_gen x (Right (Left n))= (n,0)
@@ -1158,50 +1296,202 @@ Para chegar a esta solução, para além das sugestões passadas no enunciado, t
 
 \subsection*{Problema 3}
 
+Como queremos implementar $calcLine$ como um catamorfismo de listas, assumimos $calcLine = = \llparenthesis gene\rrparenthesis$ e o seguinte diagrama representa o pretendido:\\
+
+\begin{equation*}
+    \xymatrix@C=2cm@R=2cm{
+    NPoint^* \ar[d]_{\llparenthesis gene\rrparenthesis} \ar@/^1pc/[r]^{out} & 1 + NPoint \times NPoint^* \ar@/^1pc/[l]^{in} \ar[d]^{id + id \times \llparenthesis gene\rrparenthesis}\\
+    OverTime NPoint & 1 + NPoint \times OverTime NPoint, \ar@/^1pc/[l]^{gene=[gCL1,gCL2]}
+    }
+\end{equation*}
+
 \begin{code}
+gCL1 () = const nil
+gCL2 (p,x) = ((curry g) p x) where
+    g (d,f) l = case l of
+        [] -> nil
+        (x:xs) -> \z -> concat $ (sequenceA [singl . linear1d d x, f xs]) z
+
+\end{code}
+
+\begin{code}
+
 calcLine :: NPoint -> (NPoint -> OverTime NPoint)
 calcLine = cataList h where
-   h = undefined
+   h = either gCL1 gCL2 
 
+\end{code}
+
+Para definirmos o gene do anamorfismo e do catamorfismo temos de compreender o que deve acontecer no 'divide' e no 'conquer'.
+Para tal fizemos o seguinte esquema:
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.8\textwidth]{cp2021t_media/problema3.png}
+  \caption{Esquema para percebermos o que se passa no divide e no conquer.}
+\end{figure}
+
+Uma vez que temos três situações iniciais, nomeadamente:
+\begin{itemize}
+\item Lista vazia;
+\item Lista com apenas um elemento;
+\item Lista com dois ou mais elementos.
+\end{itemize}
+
+O gene do anamorfismo será
+
+\begin{code}
+gCastel1 [] = i1 nil
+gCastel1 [p] = i1 (const p)
+gCastel1 l = i2 (init l,tail l)
+
+\end{code}
+De notar que, a saída deste gene será um NPoint ou um par de listas de NPoint. Se formos aos apontamentos da disciplina podemos verificar que é igual ao das LTrees. Portanto serão utilizados o cataLTree e o anaLTree.
+
+O gene do catamorfismo, uma vez que, recebe o resultado da chamada recursiva ficará:
+
+\begin{code}
+
+gCastel2a l = l
+gCastel2b (x,y) = \pt -> (calcLine (x pt) (y pt)) pt
+
+gCastel2 = either gCastel2a gCastel2b
+ 
 deCasteljau :: [NPoint] -> OverTime NPoint
 deCasteljau = hyloAlgForm alg coalg where
-   coalg = undefined
-   alg = undefined
+   coalg = cataLTree gCastel2
+   alg = anaLTree gCastel1
 
-hyloAlgForm = undefined
 \end{code}
+
+Como vimos nas aulas, um hilomorfismo é um catamorfismo apòs o anamorfismo. Ou seja:
+
+\begin{code}
+hyloAlgForm a b =  b . a
+\end{code}
+
+Posto isto, podemos desenhar o diagrama deste hilomorfismo:
+
+\begin{eqnarray*}
+\xymatrix@@C=2cm{
+    |NPoint* |
+           \ar[d]_-{|anaLTree gCastel1|}
+           \ar[r]_-{|gCastel1|}
+&
+    |NPoint + NPoint* >< NPoint* |
+           \ar[d]^{|id + (anaLTree gCastel1) >< (anaLTree gCastel1)|}
+\\
+     |NPoint + NPoint* >< NPoint* |
+			\ar[d]_-{|cataLTree gCastel2|}
+&
+     |NPoint + (NPoint + NPoint* >< NPoint*)><(NPoint + NPoint* >< NPoint*)|
+           \ar[d]^-{|id + (cataLTree gCastel2) >< (cataLTree gCastel2)|}
+\\
+     |OverTime NPoint|
+&
+     |NPoint + NPoint >< NPoint|
+           \ar[l]^-{|gCastel2|}
+}
+\end{eqnarray*}
 
 \subsection*{Problema 4}
 
 Solução para listas não vazias:
+
+De modo a resolvermos este problema precisamo de compreender primeiro qual o in de listas não vazias. Ora, este não difere muito do inNat definido na biblioteca List.hs.
+Temos apenas de ter em conta que existe um elemento na lista. Ou seja, o in será [singl, cons].
+
+O \textit{out} de listas não vazias será calculado da mesma maneira que calculamos o outExpAr no Problema 1, ou seja, tendo em conta que estamos perante um isomorfismo (\textit{outListasNaoVazias} \comp \textit{inListasNaoVazias} = \textit{id}):
+
+\begin{eqnarray*}
+\start
+	|outListasNaoVazias.inListasNaoVazias = id|
+%
+\just\equiv{ Definição inListasNaoVazias}
+%
+        |outListasNaoVazias.[singl, cons]|
+%
+\just\equiv{ Fusão-+ }
+%
+        |[outListasNaoVazias.singl,outListasNaoVazias.cons]=id|
+%
+\just\equiv{ Universal-+}
+%
+		|lcbr(
+		outListasNaoVazias.singl = i1
+	)(
+		outListasNaoVazias.cons = i2
+	)|
+\just\equiv{ Introdução de variáveis}
+%
+		|lcbr(
+		outListasNaoVazias [a] = i1 a
+	)(
+		outListasNaoVazias (a,x) = i2 (a,x)
+	)|
+\qed
+\end{eqnarray*}
+
 \begin{code}
 avg = p1.avg_aux
-
 
 avg_aux = avgX
 
 inListasNaoVazias = either singl cons 
 outListasNaoVazias [a] = i1 (a) 
 outListasNaoVazias (a:x) = i2 (a,x) 
+\end{code}
 
+O nosso recListasNaoVazias será o mesmo que consta na biblioteca List.hs:
+
+\begin{code}
 recListasNaoVazias = recList 
+\end{code}
 
+Por fim o nosso cataListasNaoVazias pode ser definido:
+
+\begin{code}
 cataListasNaoVazias g = g . recListasNaoVazias( cataListasNaoVazias g) . outListasNaoVazias
+\end{code}
+
+Assim, após as contas e considerações feitas anteriormente, é possível construir o seguinte diagrama para mais facilmente analisar o problema: \\
+\\
+\begin{equation*}
+    \xymatrix@C=2cm@R=2cm{
+    A^+ \ar@/^1pc/[r]^{outListasNaoVazias} \ar[d]_{<avg,length>} & A + A \times A^+ \ar[d]^{id + id \times <avg,length>} \ar@/^1pc/[l]^{inListasNaoVazias}\\
+    \mathds{R}\times\mathds{N}^+ & A + A \times (\,\mathds{R} \times \mathds{N}^+)\, \ar[l]^{g=[g1,g2]}
+    }
+\end{equation*} \\
+Se tivermos uma lista com apenas um elemento, a entrada será o próprio elemento e a saída será um par onde a primeira componente, que é relativa à média, será o próprio elemento e a segunda componente que corresponde ao comprimento será 1.
+Se tivermos uma lista com mais que um elemento, a entrada será um par em que a primeira componente será um elemento e a segunda componente será outro par em que a primeira componente deste segundo par será a média e a segunda será o comprimento. Ou seja, a sua saída será um par em que a primeira componente, de acordo com a fórmula será a soma do elemento com a multiplicação da média pelo comprimento e tudo isto a dividir pela média incrementada por um, e a segunda componente será apenas o comprimento incrementado por um. \\Dado que queremos encontrar \textit{avg\_aux}, e sabendo que $avg\_aux = \llparenthesis [b,q]\rrparenthesis$, queremos encontrar o \textit{b} e o \textit{q}. Tendo em conta o nosso diagrama, vemos que $[b,q] = [g1,g2]$.Posto isto a nossa solução é a seguinte:
+
+\begin{code}
 
 g1 a = (a,1) 
 g2 (a,(b,c)) = (((b*c)+a) / (c+1), c+1) 
 
---lengthX = cataListasNaoVazias (either g1 g2)
 
 avgX = cataListasNaoVazias (either g1 g2)
 
+
 \end{code}
 
 \begin{code}
 \end{code}
-Solução para árvores de tipo \LTree:
-\begin{code}
+Se tivermos apenas o elemento da raiz, a entrada será o próprio elemento e a saída será um par onde a primeira componente, que é relativa à média será o próprio elemento, e a segunda componente que corresponde ao comprimento será 1.
+Se tivermos mais do que apenas a raiz, a entrada será um par de dois pares, em que o da esquerda será relativo à média e ao comprimento da árvore do lado esquerdo e o da direita será relativo à média e ao comprimento da árvore do lado direito. Ou seja, na saída, que também será um par, teremos na primeira componente a soma da multiplicação da média e do comprimento do lado esquerdo e do lado direito a dividir pela soma dos dois comprimentos e na segunda a soma dos comprimentos de ambas as árvores.
+Em termos de diagramas, estamos perante o seguinte:\\
 
+\begin{equation*}
+    \xymatrix@C=2cm@R=2cm{
+    A^+ \ar[d]_{\llparenthesis gene\rrparenthesis} \ar@/^1pc/[r]^{out} & A + LTree\ A^2 \ar@/^1pc/[l]^{in} \ar[d]^{id + <avg,length>}\\
+    \mathds{R}\times\mathds{N} & A + (\, (\,\mathds{R},\mathds{N}^+)\, \times (\,\mathds{R},\mathds{N}^+)\, )\, \ar[l]^{gene=[gLT1,gLT2]}
+    }
+\end{equation*}
+
+Assim sendo, a nossa solução é a seguinte:\\
+
+\begin{code}
 avgLTree = p1.cataLTree gene where
    gene = either gLT1 gLT2 
 
