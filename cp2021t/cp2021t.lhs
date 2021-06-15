@@ -1155,6 +1155,17 @@ begin{equation*}
 \\
 \normalsize
 
+Como dito nas aulas práticas um tipico programador funcional faria seria generalizar o catamorfismo e um anamorfismo para se converter num hilomorfismo para otimização.
+
+
+sabendo que hylo f g = cata f . ana g
+
+cata f é representado como g_eval_exp a
+ana g é representado como outExpAr x
+onde ana consome os dados e cata tranforma dados
+
+
+
 \begin{code}
 clean (Bin Product _ (N 0)) = outExpAr $ N 0
 clean (Bin Product (N 0) _) = outExpAr $ N 0
@@ -1169,10 +1180,34 @@ gopt a = g_eval_exp a
 \large{Exercício 1.4}\\
 \\
 \normalsize
+Como nos é dado no enunciado é necessário aplicar transformaçõoes a expressão original que respeitem as regras das derivadas
+Para generalizar o que é dado no enunciado temos os seguintes casos modificados:
+
+Sum: 
+sd_gen (Right (Right (Left (Sum, ((a,b),(c,d)))))) = (Bin Sum a c,Bin Sum b d)
+
+product:
+sd_gen (Right (Right (Left (Product, ((a,b),(c,d))))))= (Bin Product a c,Bin Sum (Bin Product a d) (Bin Product b c)) 
+
+negate:
+sd_gen (Right (Right (Right (Negate, (a,b)))))= (Un Negate a,Un Negate b)
+
+E:
+sd_gen (Right (Right (Right (E, (a,b)))))= (Un E a,Bin Product (Un E a) b) 
+
+
+Ainda para receber estes tipos e tranforma-los temos de os definir:
+para que o BinOp possa receber dois pares fica ((ExpAr a, ExpAr a), (ExpAr a, ExpAr a)))
+para que o UnOp possa receber também um par ficar (UnOp, (ExpAr a, ExpAr a))) 
+
+aplicando assim Floating a => Either () (Either a (Either (BinOp, ((ExpAr a, ExpAr a), (ExpAr a, ExpAr a))) (UnOp, (ExpAr a, ExpAr a)))) -> (ExpAr a, ExpAr a)
+
 
 \begin{code}
-sd_gen :: Floating a =>
+
+sd_gen :: Floating a =>                   
     Either () (Either a (Either (BinOp, ((ExpAr a, ExpAr a), (ExpAr a, ExpAr a))) (UnOp, (ExpAr a, ExpAr a)))) -> (ExpAr a, ExpAr a)
+
 
 sd_gen (Left ())= (X,N 1)
 sd_gen (Right (Left a))= (N a,N 0)
@@ -1180,6 +1215,9 @@ sd_gen (Right (Right (Left (Sum, ((a,b),(c,d)))))) = (Bin Sum a c,Bin Sum b d)
 sd_gen (Right (Right (Left (Product, ((a,b),(c,d))))))= (Bin Product a c,Bin Sum (Bin Product a d) (Bin Product b c))
 sd_gen (Right (Right (Right (Negate, (a,b)))))= (Un Negate a,Un Negate b)
 sd_gen (Right (Right (Right (E, (a,b)))))= (Un E a,Bin Product (Un E a) b)
+
+
+
 
 \end{code}
 
