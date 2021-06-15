@@ -1126,6 +1126,17 @@ recExpAr f = baseExpAr' id f
 \large{Exercício 1.2}\\
 \\
 \normalsize
+
+De forma algo intuitiva é possível perceber como será defenido este gene tendo em conta o seguinte. Se $ExpAr a$: \\
+\begin{itemize}
+    \item É igual a $X$, então o resultado pertendido é $x$;
+    \item É igual a $N\ a$, o resultado pertendido é o próprio $a$;
+    \item É igual a $BinOp\ Sum\ (a,b)$, o resultado pertendido é $ a + b$;
+    \item É igual a $BinOp\ Product\ (a,b)$, o resultado pertendido é $ a \times b$;
+    \item É igual a $UnOp\ Negate\ a$, o resultado pertendido é $ (-1) \times a $;
+    \item É igual a $UnOp\ E\ a$, o resultado pertendido é $ expd a$.
+\end{itemize}
+
 O gene do catamorfismo da função eval\textunderscore exp será definido da seguinte maneira:
 
 \begin{code}
@@ -1227,8 +1238,7 @@ sd_gen (Right (Right (Right (E, (a,b)))))= (Un E a,Bin Product (Un E a) b)
 \\
 \normalsize
 
-Sendo que queremos encontrar o gene de $ad$ podemos assumir o próximo diagrama:\\
-
+O mesmo raciocinio do 1.4 se aplica a este exercício tendo em conta agora que queremos calcular o valor da derivada no ponto passado como argumento. Como queremos encontrar o gene de $ad$ podemos assumir o próximo diagrama:\\
 \begin{equation*}
     \xymatrix@C=2cm@R=2cm{
      ExpAr\ar@/^2pc/[r]^{outExpAr} \ar[d]^{\llparenthesis ad\_gen\rrparenthesis} \ar@/_2pc/[dd]_{ad} & 1 + (A + ((BinOp \times (ExpAr \times ExpAr)) + (UnOp \times ExpAr))) \ar@/^2pc/[l]^{inExpAr} \ar[d]^{id + (id + ((id \times (\llparenthesis ad\_gen\rrparenthesis \times \llparenthesis ad\_gen\rrparenthesis)) + (id \times \llparenthesis ad\_gen\rrparenthesis)}  \\
